@@ -1,6 +1,7 @@
-NAME = "exp-023"
+NAME = "exp-026"
 
-DESCRIPTION = "GroupKfold, team->name"
+
+DESCRIPTION = "GroupKfold_3_team"
 
 
 CV = "StratioifiedFold_3splits"
@@ -16,7 +17,8 @@ TRAIN_FOLD_FILE = "../input/orgn/folds/train_folds.pkl"
 
 MODEL_OUTPUT = '../models/'
 
-MODEL = "LGBM"
+# MODEL = "LGBM"
+MODEL = "CB"
 # MODEL = "NN"
 
 
@@ -93,16 +95,30 @@ PARAMS_LGBM = {
     "learning_rate": 0.001,
     "num_leaves": 31,
     "max_depth": -1,
-    # min_data_in_leaf: 30,
-    # min_child_samples: 20,
-    # feature_fraction: 0.9,
-    # bagging_freq: 1,
-    # bagging_fraction: 0.9,
-    # bagging_seed: 11,
-    # lambda_l1: 0.1,
+    # "min_data_in_leaf": 30,
+    "min_child_samples": 20,
+    # "feature_fraction": 0.9,
+    # "bagging_freq": 1,
+    # "bagging_fraction": 0.9,
+    # "bagging_seed": 11,
+    # "lambda_l1": 0.1,
     "verbosity": -1,
     "nthread": -1,
     "random_state": 42,
+}
+
+
+PARAMS_CAT = {
+    "loss_function": "RMSE",
+    'eval_metric': 'RMSE',
+    "iterations": 100000,
+    'learning_rate': 0.001,
+    'depth': 5,
+    'early_stopping_rounds': 100,
+    'random_seed': 42,
+    'allow_writing_files': False,
+    'task_type': "CPU",
+    'min_child_samples': 20,
 }
 
 

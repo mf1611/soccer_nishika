@@ -10,6 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import lightgbm as lgb
+import catboost as cb
 from sklearn.metrics import mean_squared_error, roc_auc_score
 
 
@@ -60,16 +61,24 @@ def run(df, fold):
     x_valid = df_valid.drop(["label", "kfold"], axis=1)#.values
     y_valid = df_valid["label"]#.values
 
-    # lgb dataset
-    tr_data = lgb.Dataset(x_train, label=y_train)
-    val_data = lgb.Dataset(x_valid, label=y_valid)
+
+    cat_cols = [col for col in config.FEATURES if col in config.CAT_COLS]
+
+    # cb dataset
+    tr_data = cb.Pool(x_train, label=y_train,cat_features=cat_cols)
+    val_data = cb.Pool(x_valid, label=y_valid, cat_features=cat_cols)
 
     # read params
-    params = config.PARAMS_LGBM
+    params = config.PARAMS_CAT
 
-    model = lgb.train(params, tr_data, num_boost_round=10000, valid_sets = [tr_data, val_data], verbose_eval=None, early_stopping_rounds=100, callbacks=callbacks)
-    
-    preds = model.predict(x_valid, num_iteration=model.best_iteration)
+    model = cb.CatBoost(params)
+    model.fit(tr_data,
+              eval_set=val_data,
+              verbose_eval=100,
+              use_best_model=True,
+              plot=False)
+ 
+    preds = model.predict(x_valid)
 
     rmse = np.sqrt(mean_squared_error(y_valid, preds))
     print(f"Fold={fold}, RMSE={rmse}")
@@ -77,7 +86,7 @@ def run(df, fold):
 
     fold_importance_df = pd.DataFrame()
     fold_importance_df["feature"] = df_train.drop(["label", "kfold"], axis=1).columns
-    fold_importance_df["importance"] = model.feature_importance()
+    fold_importance_df["importance"] = model.get_feature_importance()
     fold_importance_df["fold"] = fold
 
     # save the model
@@ -104,9 +113,15 @@ if __name__ == "__main__":
 
     df = df.replace("-", np.nan)
 
-    #df = df[config.CONT_COLS + config.CAT_COLS + ["label", "kfold"]]
-    df[config.CONT_COLS] = df[config.CONT_COLS].astype('float')
-    df[config.CAT_COLS] = df[config.CAT_COLS].astype('category')
+    # 欠損値補完
+    cont_cols = [col for col in config.FEATURES if col not in config.CAT_COLS]
+    df[cont_cols] = df[cont_cols].fillna(df[cont_cols].mean())
+    df[config.CAT_COLS] = df[config.CAT_COLS].fillna(df[config.CAT_COLS].mode())
+    df = df.fillna(-999)
+
+
+    # df[config.CONT_COLS] = df[config.CONT_COLS].astype('float')
+    # df[config.CAT_COLS] = df[config.CAT_COLS].astype('category')
 
     df = df[config.FEATURES+["label", "kfold"]]
 
@@ -115,7 +130,7 @@ if __name__ == "__main__":
     score = 0
     feature_importance_df = pd.DataFrame()
     for i in range(num_folds):
-        rmse, fold_importance_df = run(fold=i)
+        rmse, fold_importance_df = run(df, fold=i)
         feature_importance_df = pd.concat([feature_importance_df, fold_importance_df], axis=0)
         score += rmse / num_folds
 

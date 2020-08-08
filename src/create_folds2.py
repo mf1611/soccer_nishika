@@ -79,9 +79,8 @@ def create_folds(data):
     data.loc[:, "bins"] = pd.cut(data["label"], bins=int(num_bins), labels=False)
 
 
-    # kf = model_selection.StratifiedKFold(n_splits=config.NUM_FOLDS)
-    #for f, (tr_idx, val_idx) in enumerate(stratified_group_k_fold(data, data.bins.values, groups=np.array(data['team'].values), k=config.NUM_FOLDS, seed=42)):
-    for f, (tr_idx, val_idx) in enumerate(stratified_group_k_fold(data, data.bins.values, groups=np.array(data['name'].values), k=config.NUM_FOLDS, seed=42)):
+    # nameよりもteamの方が良かった
+    for f, (tr_idx, val_idx) in enumerate(stratified_group_k_fold(data, data.bins.values, groups=np.array(data['team'].values), k=config.NUM_FOLDS, seed=42)):
         data.loc[val_idx, "kfold"] = f
     
     data = data.drop("bins", axis=1)

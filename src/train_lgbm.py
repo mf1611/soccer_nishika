@@ -115,7 +115,7 @@ if __name__ == "__main__":
     score = 0
     feature_importance_df = pd.DataFrame()
     for i in range(num_folds):
-        rmse, fold_importance_df = run(fold=i)
+        rmse, fold_importance_df = run(df, fold=i)
         feature_importance_df = pd.concat([feature_importance_df, fold_importance_df], axis=0)
         score += rmse / num_folds
 
