@@ -1,7 +1,7 @@
-NAME = "exp-026"
+NAME = "exp-032"
 
 
-DESCRIPTION = "GroupKfold_3_team"
+DESCRIPTION = "Reproducibility test"
 
 
 CV = "StratioifiedFold_3splits"
@@ -17,8 +17,8 @@ TRAIN_FOLD_FILE = "../input/orgn/folds/train_folds.pkl"
 
 MODEL_OUTPUT = '../models/'
 
-# MODEL = "LGBM"
-MODEL = "CB"
+MODEL = "LGBM"
+# MODEL = "CB"
 # MODEL = "NN"
 
 

@@ -81,7 +81,8 @@ def run(fold):
     model = lgb.train(params, 
                       tr_data,
                       valid_sets=[tr_data, val_data],
-                      early_stopping_rounds=100)
+                      early_stopping_rounds=100,
+                      )
 
     # model = lgb.train(params, tr_data, num_boost_round=10000, valid_sets = [tr_data, val_data], verbose_eval=None, early_stopping_rounds=100, callbacks=callbacks)
     

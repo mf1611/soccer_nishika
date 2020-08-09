@@ -65,11 +65,57 @@ def run(df, fold):
     val_data = lgb.Dataset(x_valid, label=y_valid)
 
     # read params
-    params = config.PARAMS_LGBM
-
-    model = lgb.train(params, tr_data, num_boost_round=10000, valid_sets = [tr_data, val_data], verbose_eval=None, early_stopping_rounds=100, callbacks=callbacks)
+    # params = config.PARAMS_LGBM
     
-    preds = model.predict(x_valid, num_iteration=model.best_iteration)
+    if fold==0:
+        params = {
+            'objective': 'regression', 
+            'metric': 'rmse', 
+            'verbosity': -1, 
+            'boosting_type': 'gbdt', 
+            'lambda_l1': 0.09699429461590584, 
+            'lambda_l2': 0.004311520647159246, 
+            'num_leaves': 31, 
+            'feature_fraction': 0.8160000000000001, 
+            'bagging_fraction': 0.5582635034118433, 
+            'bagging_freq': 6, 
+            'min_child_samples': 20,
+            'num_iterations': 35,
+            }
+    elif fold==1:
+        params = {
+            'objective': 'regression', 
+            'metric': 'rmse', 
+            'verbosity': -1, 
+            'boosting_type': 'gbdt', 
+            'lambda_l1': 1.3050224610455826e-07, 
+            'lambda_l2': 0.343602749521761, 
+            'num_leaves': 6, 
+            'feature_fraction': 0.4, 
+            'bagging_fraction': 0.7549962274077077, 
+            'bagging_freq': 5, 
+            'min_child_samples': 25,
+            'num_iterations': 40,
+            }
+    elif fold==2:
+        params = {
+            'objective': 'regression', 
+            'metric': 'rmse', 
+            'verbosity': -1, 
+            'boosting_type': 'gbdt', 
+            'lambda_l1': 0.0, 
+            'lambda_l2': 0.0, 
+            'num_leaves': 10, 
+            'feature_fraction': 0.52, 
+            'bagging_fraction': 0.7094930238090609, 
+            'bagging_freq': 7, 
+            'min_child_samples': 20,
+            'num_iterations': 38,
+            }
+
+    model = lgb.train(params, tr_data, valid_sets = [tr_data, val_data], verbose_eval=None, early_stopping_rounds=100, callbacks=callbacks)
+    
+    preds = model.predict(x_valid)
 
     rmse = np.sqrt(mean_squared_error(y_valid, preds))
     print(f"Fold={fold}, RMSE={rmse}")
